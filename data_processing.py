@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import pickle
+import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.decomposition import PCA
@@ -11,7 +13,6 @@ from database_connection import create_connection
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-
 
 
 # Function to handle missing values by replacing them with the mean of each column
@@ -95,6 +96,24 @@ def load_data_from_database():
 
     return X, y
 
+def train_model(X_train, y_train):
+    # Train your model here
+    model = RandomForestClassifier()
+    model.fit(X_train, y_train)
+    return model
+
+def save_model(model, filepath):
+    # Save the trained model to a file with compression using pickle
+    with open(filepath, 'wb') as file:
+        pickle.dump(model, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def load_model(filepath):
+    with open(filepath, 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+
 def main():
     # Load protein data from the database
     X, y = load_data_from_database()
@@ -156,6 +175,14 @@ def main():
     
     print("Accuracy:", accuracy)
 
+    # Train the model
+    model = train_model(X_train, y_train)
+
+    print("X_train",X_train)
+    print("y_train",y_train)
+
+    # Save the trained model to a file
+    save_model(model, 'trained_model/trained_model.pickle')
 
 if __name__ == '__main__':
     main()
